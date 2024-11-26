@@ -419,7 +419,7 @@ async function makeDeposit(event) {
 }
 
     </script>
-    <script>
+    <!-- <script>
         async function fetchUsersWithProfits() {
     const userProfits = document.getElementById('userProfits');
     try {
@@ -444,7 +444,7 @@ async function makeDeposit(event) {
                     <td>$${user.profits}</td>
                     <td>${user.profitPaused ? 'Paused' : 'Active'}</td>
                     <td>
-                        <button class="btn btn-warning" onclick="pauseProfit('${user._id}')">
+                        <button class="btn btn-warning" onclick="toggleProfit('${user._id}')">
                             ${user.profitPaused ? 'Resume Profit' : 'Pause Profit'}
                         </button>
                     </td>
@@ -457,7 +457,30 @@ async function makeDeposit(event) {
     }
 }
 
-async function pauseProfit(userId) {
+// async function pauseProfit(userId) {
+//     try {
+//         const response = await fetch(`/api/admin/users/${userId}/pause-profit`, {
+//             method: 'POST',
+//             headers: {
+//                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+//                 'Content-Type': 'application/json'
+//             }
+//         });
+
+//         if (!response.ok) {
+//             throw new Error('Failed to pause profit');
+//         }
+
+//         const data = await response.json();
+//         alert(data.message); // Show the status message
+//         fetchUsersWithProfits(); // Refresh the user list
+//     } catch (error) {
+//         console.error('Error pausing profit:', error);
+//         alert(error.message);
+//     }
+// }
+
+// async function toggleProfit(userId) {
     try {
         const response = await fetch(`/api/admin/users/${userId}/pause-profit`, {
             method: 'POST',
@@ -466,24 +489,130 @@ async function pauseProfit(userId) {
                 'Content-Type': 'application/json'
             }
         });
-
         if (!response.ok) {
-            throw new Error('Failed to pause profit');
+            throw new Error('Failed to toggle profit');
         }
-
         const data = await response.json();
         alert(data.message); // Show the status message
         fetchUsersWithProfits(); // Refresh the user list
     } catch (error) {
-        console.error('Error pausing profit:', error);
+        console.error('Error toggling profit:', error);
         alert(error.message);
     }
 }
+
+
+async function toggleProfit(userId, button) {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/pause-profit`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to toggle profit');
+            }
+
+            const data = await response.json();
+            alert(data.message); // Show the status message
+
+            // Toggle the button text based on the new state
+            if (button.textContent.includes('Resume')) {
+                button.textContent = 'Pause Profit';
+                button.closest('tr').children[3].textContent = 'Active';
+            } else {
+                button.textContent = 'Resume Profit';
+                button.closest('tr').children[3].textContent = 'Paused';
+            }
+        } catch (error) {
+            console.error('Error toggling profit:', error);
+            alert(error.message);
+        }
+    }
+
 
 // Call fetchUsersWithProfits on page load
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchUsersWithProfits();
 });
+    </script> -->
+
+    <script>
+        async function fetchUsersWithProfits() {
+            const userProfits = document.getElementById('userProfits');
+            try {
+                const response = await fetch('/api/admin/users/profits', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+    
+                const users = await response.json();
+                userProfits.innerHTML = ''; // Clear previous content
+    
+                users.forEach(user => {
+                    userProfits.innerHTML += `
+                        <tr>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>$${user.profits}</td>
+                            <td>${user.profitsPaused ? 'Paused' : 'Active'}</td>
+                            <td>
+                                <button class="btn btn-warning" onclick="toggleProfit('${user._id}', this)">
+                                    ${user.profitsPaused ? 'Resume Profit' : 'Pause Profit'}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading users with profits:', error);
+                userProfits.innerHTML = '<tr><td colspan="5">Error loading users</td></tr>';
+            }
+        }
+    
+        async function toggleProfit(userId, button) {
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/pause-profit`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to toggle profit');
+                }
+    
+                const data = await response.json();
+                alert(data.message); // Show the status message
+    
+                // Toggle the button text based on the new state
+                if (button.textContent.includes('Resume')) {
+                    button.textContent = 'Pause Profit';
+                    button.closest('tr').children[3].textContent = 'Active';
+                } else {
+                    button.textContent = 'Resume Profit';
+                    button.closest('tr').children[3].textContent = 'Paused';
+                }
+            } catch (error) {
+                console.error('Error toggling profit:', error);
+                alert(error.message);
+            }
+        }
+    
+        // Call fetchUsersWithProfits on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchUsersWithProfits();
+        });
     </script>
 
 <script>
